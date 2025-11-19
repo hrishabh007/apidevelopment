@@ -239,8 +239,9 @@
                             type="file"
                             class="form-control"
                             id="editProfilePicFile"
-                            name="profile_pic_file"
-                            accept="image/*"
+                            name="profile_pic"
+                    accept="image/*"
+                    />
                     >
                 </div>
 
@@ -271,7 +272,7 @@
     let currentLimit = 5; // same as backend default
     let currentSearch = "";
 
-    async function fetchStudents(search = "", page = 1, limit = 5) {
+    async function fetchStudents(search = "", page = 1, limit = 3) {
         try {
             const response = await fetch(
                 `${apiUrl}?search=${encodeURIComponent(search)}&page=${page}&limit=${limit}`
@@ -303,6 +304,33 @@
     function renderPagination(totalPages) {
         const paginationContainer = document.getElementById('pagination');
         paginationContainer.innerHTML = '';
+        // Previous Button
+        const prevButton = document.createElement('li');
+        prevButton.classList.add('page-item');
+
+// disable if on first page
+        if (currentPage === 1) prevButton.classList.add('disabled');
+
+        prevButton.innerHTML = `
+    <a class="page-link" href="#" onclick="fetchStudents('${currentSearch}', ${currentPage - 1})">
+        Previous
+    </a>
+`;
+        paginationContainer.appendChild(prevButton);
+
+// Next Button
+        const nextButton = document.createElement('li');
+        nextButton.classList.add('page-item');
+
+// disable if on last page
+        if (currentPage === totalPages) nextButton.classList.add('disabled');
+
+        nextButton.innerHTML = `
+    <a class="page-link" href="#" onclick="fetchStudents('${currentSearch}', ${currentPage + 1})">
+        Next
+    </a>
+`;
+        paginationContainer.appendChild(nextButton);
         if (totalPages <= 1) return;
         for (let i = 1; i <= totalPages; i++) {
             const pageLink = document.createElement('li');
