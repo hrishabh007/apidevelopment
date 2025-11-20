@@ -318,7 +318,15 @@
 `;
         paginationContainer.appendChild(prevButton);
 
-// Next Button
+
+        if (totalPages <= 1) return;
+        for (let i = 1; i <= totalPages; i++) {
+            const pageLink = document.createElement('li');
+            pageLink.classList.add('page-item');
+            pageLink.innerHTML = `<a class="page-link" href="#" onclick="fetchStudents('', ${i})">${i}</a>`;
+            paginationContainer.appendChild(pageLink);
+        }
+        // Next Button
         const nextButton = document.createElement('li');
         nextButton.classList.add('page-item');
 
@@ -331,13 +339,6 @@
     </a>
 `;
         paginationContainer.appendChild(nextButton);
-        if (totalPages <= 1) return;
-        for (let i = 1; i <= totalPages; i++) {
-            const pageLink = document.createElement('li');
-            pageLink.classList.add('page-item');
-            pageLink.innerHTML = `<a class="page-link" href="#" onclick="fetchStudents('', ${i})">${i}</a>`;
-            paginationContainer.appendChild(pageLink);
-        }
     }
 
     function renderStudents(students, page = 1, limit = 5) {
