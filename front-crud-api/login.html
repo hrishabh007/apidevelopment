@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 25px;
+            width: 300px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2 { text-align: center; }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #aaa;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover { background: #27ae60; }
+        .link {
+            text-align: center;
+            margin-top: 10px;
+        }
+        a { color: #3498db; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Login</h2>
+
+    <form id="loginForm"  class="loginForm" method="POST">
+        <input id="email" type="email" name="email" placeholder="Enter Email" required>
+        <input id="password" type="password" name="password" placeholder="Enter Password" required>
+        <button type="submit">Login</button>
+    </form>
+
+
+    <div class="link">
+        Don't have an account? <a href="/register">Register</a>
+    </div>
+</div>
+<script src="js/script.js"></script>
+
+<!--<script>-->
+<!--    // If already logged in, skip login page-->
+<!--    if (localStorage.getItem("token")) {-->
+<!--        window.location.href = "/students";-->
+<!--    }-->
+<!--</script>-->
+
+</body>
+</html>

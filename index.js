@@ -3,6 +3,8 @@ const app = express();
 const cors = require('cors');
 const path = require('path');
 const connectDb = require('./config/databse');
+const auth = require('./middleware/auth');
+const userRoutes = require('./routes/user.routes');
 connectDb()
 const PORT = process.env.PORT || 5000;
 
@@ -13,13 +15,25 @@ app.use(express.urlencoded({extended: false}));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(cors());
-app.use('/api/students', studentRoutes)
+app.use('/api/users', userRoutes);
 
+// 🔹 NEW: serve JS files
+app.use('/js', express.static(path.join(__dirname, 'front-crud-api', 'js')));
+
+app.use('/api/students',auth, studentRoutes)
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'front-crud-api/login.html'));
+});
+app.get('/register', (req, res) => {
+    res.sendFile(path.join(__dirname, 'front-crud-api/register.html'));
+});
 
 // Serve students.html on root route
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'students.html'));
+app.get('/students', (req, res) => {
+    res.sendFile(path.join(__dirname, 'front-crud-api/students.html'));
 });
+
 
 app.use((err, req, res, next) => {
     if (err instanceof multer.MulterError) {
