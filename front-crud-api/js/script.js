@@ -1,4 +1,3 @@
-
 const apiUrl = 'http://localhost:3000/api/users';
 
 const userForm = document.querySelector('.loginForm');
@@ -10,7 +9,7 @@ if (localStorage.getItem('token')) {
     window.location.href = '/students';
 }
 
-if(userRegisterForm){
+if (userRegisterForm) {
     userRegisterForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = document.querySelector('#username').value;
@@ -24,10 +23,10 @@ if(userRegisterForm){
         })
         const data = await res.json();
         console.log(data);
-        if(res.ok){
+        if (res.ok) {
             alert('User registered successfully');
             window.location.href = '/';
-        }else {
+        } else {
             alert(data.message || 'Registration failed');
         }
     })
@@ -44,8 +43,8 @@ if (userForm) {
 
         const res = await fetch(apiUrl + '/login', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })  // FIXED
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email, password})  // FIXED
         });
 
         const data = await res.json();

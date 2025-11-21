@@ -26,7 +26,7 @@ app.use(express.static(path.join(__dirname, 'front-crud-api')));
 
 // 🔹 API routes
 app.use('/api/users', userRoutes);
-app.use('/api/students', auth,limiter, studentRoutes);
+app.use('/api/students', auth, studentRoutes);
 
 // 🔹 Pages
 app.get('/', (req, res) => {

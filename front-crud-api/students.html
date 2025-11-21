@@ -263,85 +263,66 @@
 </div>
 
 <!-- Bootstrap JS (with Popper) -->
+<!-- 🔹 Common API helper (defines apiFetch) -->
+<script src="js/api.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    const apiUrl = 'http://localhost:3000/api/students'; // match your Node server PORT
-    let studentsCache = []; // Array to store all students
-    let currentPage = 1;
-    let currentLimit = 5; // same as backend default
-    let currentSearch = "";
-
-    // Auth check
-    function checkAuth() {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            window.location.href = 'login';
-        }
-        return token;
+    // 🔐 Block access if not logged in
+    if (!localStorage.getItem('token')) {
+        window.location.href = '/';
     }
 
-    const token = checkAuth();
+    const STUDENT_API_PATH = '/api/students';
+    let studentsCache = [];
+    let currentPage = 1;
+    let currentLimit = 5;
+    let currentSearch = "";
 
-    // Fetch students (with search + pagination)
+    // 🔹 Fetch students (with search + pagination) using apiFetch
     async function fetchStudents(search = "", page = 1, limit = 3) {
         try {
-            const response = await fetch(
-                `${apiUrl}?search=${encodeURIComponent(search)}&page=${page}&limit=${limit}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
+            const data = await apiFetch(
+                `${STUDENT_API_PATH}?search=${encodeURIComponent(search)}&page=${page}&limit=${limit}`
             );
 
-            if (!response.ok) throw new Error("Failed to fetch students");
+            console.log('API Response:', data);
 
-            const data = await response.json();
-
-            console.log("API Response:", data);
-
-            // Extract array from API
-            studentsCache = data.students;
-
-            // Save current state
+            studentsCache = data.students || [];
             currentPage = data.page || page;
             currentLimit = data.limit || limit;
             currentSearch = search;
 
             renderStudents(studentsCache, currentPage, currentLimit);
-            renderPagination(data.totalPages);
-
+            renderPagination(data.totalPages || 1);
         } catch (err) {
             console.error(err);
-            alert("Error loading students");
+            alert(err.message || 'Error loading students');
         }
     }
 
-    // Pagination renderer
+    // 🔹 Pagination renderer
     function renderPagination(totalPages) {
         const paginationContainer = document.getElementById('pagination');
         paginationContainer.innerHTML = '';
 
-        // Previous Button
         const prevButton = document.createElement('li');
         prevButton.classList.add('page-item');
-
-        // disable if on first page
         if (currentPage === 1) prevButton.classList.add('disabled');
 
         prevButton.innerHTML = `
             <a class="page-link" href="#" onclick="fetchStudents('${currentSearch}', ${currentPage - 1})">
                 Previous
-            </a>
-        `;
+            </a>`;
         paginationContainer.appendChild(prevButton);
 
         if (totalPages <= 1) return;
 
-        // Page numbers
         for (let i = 1; i <= totalPages; i++) {
             const pageLink = document.createElement('li');
             pageLink.classList.add('page-item');
+            if (i === currentPage) pageLink.classList.add('active');
+
             pageLink.innerHTML = `
                 <a class="page-link" href="#" onclick="fetchStudents('${currentSearch}', ${i})">
                     ${i}
@@ -349,36 +330,32 @@
             paginationContainer.appendChild(pageLink);
         }
 
-        // Next Button
         const nextButton = document.createElement('li');
         nextButton.classList.add('page-item');
-
-        // disable if on last page
         if (currentPage === totalPages) nextButton.classList.add('disabled');
 
         nextButton.innerHTML = `
             <a class="page-link" href="#" onclick="fetchStudents('${currentSearch}', ${currentPage + 1})">
                 Next
-            </a>
-        `;
+            </a>`;
         paginationContainer.appendChild(nextButton);
     }
 
-    // Render student rows
+    // 🔹 Render student rows
     function renderStudents(students, page = 1, limit = 5) {
         const tbody = document.querySelector('#studentTableBody');
         tbody.innerHTML = '';
 
-        const startIndex = (page - 1) * limit; // offset for pagination
+        const startIndex = (page - 1) * limit;
 
         students.forEach((student, index) => {
             const tr = document.createElement('tr');
 
             tr.dataset.studentId = student._id;
             tr.dataset.firstName = student.first_name;
-            tr.dataset.lastName = student.last_name;
-            tr.dataset.email = student.email;
-            tr.dataset.gender = student.gender;
+            tr.dataset.lastName  = student.last_name;
+            tr.dataset.email     = student.email;
+            tr.dataset.gender    = student.gender;
             tr.dataset.profilePic = student.profile_pic || '';
 
             tr.innerHTML = `
@@ -409,25 +386,19 @@
         });
     }
 
-    // Delete student
+    // 🔹 Delete student (using apiFetch)
     async function deleteStudent(id) {
         if (!confirm('Are you sure you want to delete this student?')) return;
 
         try {
-            const response = await fetch(`${apiUrl}/${id}`, {
+            await apiFetch(`${STUDENT_API_PATH}/${id}`, {
                 method: 'DELETE',
             });
 
-            if (!response.ok) {
-                const text = await response.text();
-                throw new Error(text || 'Failed to delete student');
-            }
-
-            // reload table after delete
-            await fetchStudents();
+            await fetchStudents(currentSearch, currentPage, currentLimit);
         } catch (err) {
             console.error(err);
-            alert('Error deleting student');
+            alert('Error deleting student: ' + err.message);
         }
     }
 
@@ -436,20 +407,17 @@
     const viewStudentModalElement = document.getElementById('viewStudentModal');
     const viewStudentModal = new bootstrap.Modal(viewStudentModalElement);
 
-    const editStudentModalElement = document.getElementById('editStudentModal');
-
-
     function openStudentModal(trElement) {
         const firstName = trElement.dataset.firstName;
-        const lastName = trElement.dataset.lastName;
-        const email = trElement.dataset.email;
-        const gender = trElement.dataset.gender;
+        const lastName  = trElement.dataset.lastName;
+        const email     = trElement.dataset.email;
+        const gender    = trElement.dataset.gender;
         const profilePic = trElement.dataset.profilePic || '';
 
         document.getElementById('modalFirstName').textContent = firstName;
-        document.getElementById('modalLastName').textContent = lastName;
-        document.getElementById('modalEmail').textContent = email;
-        document.getElementById('modalGender').textContent = gender;
+        document.getElementById('modalLastName').textContent  = lastName;
+        document.getElementById('modalEmail').textContent     = email;
+        document.getElementById('modalGender').textContent    = gender;
 
         const img = document.getElementById('modalProfilePic');
         if (profilePic) {
@@ -462,26 +430,21 @@
         viewStudentModal.show();
     }
 
-    // Open Edit Student modal
     function openEditStudentModal(trElement) {
-        const id = trElement.dataset.studentId;
+        const id        = trElement.dataset.studentId;
         const firstName = trElement.dataset.firstName;
-        const lastName = trElement.dataset.lastName;
-        const email = trElement.dataset.email;
-        const gender = trElement.dataset.gender;
+        const lastName  = trElement.dataset.lastName;
+        const email     = trElement.dataset.email;
+        const gender    = trElement.dataset.gender;
         const profilePic = trElement.dataset.profilePic || '';
 
-        // Fill form fields with the current student data
-        document.getElementById('editStudentId').value = id;
+        document.getElementById('editStudentId').value      = id;
         document.getElementById('editFirstNameInput').value = firstName;
-        document.getElementById('editLastNameInput').value = lastName;
-        document.getElementById('editEmailInput').value = email;
-        document.getElementById('editGenderSelect').value = gender;
-
-        // Set the hidden field to store the old profile picture URL
+        document.getElementById('editLastNameInput').value  = lastName;
+        document.getElementById('editEmailInput').value     = email;
+        document.getElementById('editGenderSelect').value   = gender;
         document.getElementById('editProfilePicHidden').value = profilePic;
 
-        // Show existing photo preview if present
         const preview = document.getElementById('editProfilePicPreview');
         if (profilePic) {
             preview.src = profilePic;
@@ -490,120 +453,77 @@
             preview.classList.add('d-none');
         }
 
-        // Clear the file input field to allow a new file to be uploaded
         document.getElementById('editProfilePicFile').value = '';
 
-        // Show modal
         const editStudentModalInstance = new bootstrap.Modal(document.getElementById('editStudentModal'));
         editStudentModalInstance.show();
     }
 
-    // Handle form submission for updating student details
+    // 🔹 Update student (PUT with FormData via apiFetch)
     document.getElementById('editStudentForm').addEventListener('submit', async (event) => {
         event.preventDefault();
 
         const form = event.target;
-        const formData = new FormData(form); // Handles both text fields and file uploads
+        const formData = new FormData(form);
 
         try {
-            const response = await fetch(`${apiUrl}/${formData.get('id')}`, {
+            await apiFetch(`${STUDENT_API_PATH}/${formData.get('id')}`, {
                 method: 'PUT',
-                headers: {
-                    Authorization: `Bearer ${token}`
-                },
-                body: formData,
+                body: formData, // browser sets multipart headers automatically
             });
 
-            if (!response.ok) throw new Error('Failed to update student');
-
-            const updatedStudent = await response.json();
             alert('Student updated successfully!');
-
-            // Refresh list and close modal
-            fetchStudents();
+            await fetchStudents(currentSearch, currentPage, currentLimit);
             bootstrap.Modal.getInstance(document.getElementById('editStudentModal')).hide();
 
         } catch (error) {
             console.error(error);
-            alert('Error updating student');
+            alert('Error updating student: ' + error.message);
         }
     });
 
-    // Search functionality + Add handlers after DOM load
+    // 🔹 DOMContentLoaded for search + add form
     document.addEventListener('DOMContentLoaded', () => {
         const searchInput = document.getElementById('searchInput');
 
-        // Search: server-side
         searchInput.addEventListener('input', () => {
             const query = searchInput.value.trim();
 
             if (query.length === 0) {
-                // If user clears search → load all again
                 fetchStudents();
             } else if (query.length >= 3) {
-                // Call backend search API
                 fetchStudents(query);
             }
         });
 
-        // Add Student form
         document.getElementById('addStudentForm').addEventListener('submit', async function (event) {
             event.preventDefault();
 
             const formData = new FormData(this);
 
             try {
-                const response = await fetch(`${apiUrl}`, {
+                await apiFetch(STUDENT_API_PATH, {
                     method: 'POST',
                     body: formData,
                 });
 
-                if (!response.ok) {
-                    throw new Error('Failed to add student');
-                }
-
-                const newStudent = await response.json();
                 alert('Student added successfully!');
-
-                // Hide modal
                 const addModalEl = document.getElementById('addStudentModal');
                 bootstrap.Modal.getInstance(addModalEl).hide();
 
                 this.reset();
-                fetchStudents();  // Refresh student list
+                fetchStudents();
             } catch (error) {
                 console.error(error);
                 alert('Error adding student: ' + error.message);
             }
         });
 
-        // Optional: attach handlers to any static buttons (if present)
-        document.querySelectorAll('.btn-view-student').forEach(btn => {
-            btn.addEventListener('click', function () {
-                const tr = this.closest('tr');
-                openStudentModal(tr);
-            });
-        });
-
-        document.querySelectorAll('.link-view-pic').forEach(link => {
-            link.addEventListener('click', function (e) {
-                e.preventDefault();
-                const tr = this.closest('tr');
-                openStudentModal(tr);
-            });
-        });
-
-        document.querySelectorAll('.btn-edit-student').forEach(btn => {
-            btn.addEventListener('click', function () {
-                const tr = this.closest('tr');
-                openEditStudentModal(tr);
-            });
-        });
-
         // Initial load
         fetchStudents();
     });
 </script>
+
 
 
 </body>
