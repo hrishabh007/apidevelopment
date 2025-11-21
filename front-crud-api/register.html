@@ -14,14 +14,19 @@
             height: 100vh;
             margin: 0;
         }
+
         .container {
             background: white;
             padding: 25px;
             width: 300px;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        h2 { text-align: center; }
+
+        h2 {
+            text-align: center;
+        }
+
         input {
             width: 100%;
             padding: 10px;
@@ -29,6 +34,7 @@
             border: 1px solid #aaa;
             border-radius: 5px;
         }
+
         button {
             width: 100%;
             padding: 10px;
@@ -38,12 +44,20 @@
             border-radius: 5px;
             cursor: pointer;
         }
-        button:hover { background: #2980b9; }
+
+        button:hover {
+            background: #2980b9;
+        }
+
         .link {
             text-align: center;
             margin-top: 10px;
         }
-        a { color: #3498db; text-decoration: none; }
+
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
@@ -51,7 +65,8 @@
 <div class="container">
     <h2>Register</h2>
 
-    <form id="registerForm" action="/register" method="POST">
+
+    <form id="registerForm" class="registerForm" method="POST">
         <input type="text" id="username" name="username" placeholder="Enter Username" required>
         <input type="email" id="email" name="email" placeholder="Enter Email" required>
         <input type="password" id="password" name="password" placeholder="Enter Password" required>
@@ -63,6 +78,6 @@
         Already have an account? <a href="/">Login</a>
     </div>
 </div>
-<script src="js/script.js"></script>
+<script src="/js/script.js"></script>
 </body>
 </html>

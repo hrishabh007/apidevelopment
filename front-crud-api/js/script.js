@@ -3,15 +3,15 @@ const apiUrl = 'http://localhost:3000/api/users';
 
 const userForm = document.querySelector('.loginForm');
 
-const registerForm = document.querySelector('.registerForm');
+const userRegisterForm = document.querySelector('.registerForm');
 
 // 🔹 Auto redirect if token exists
 if (localStorage.getItem('token')) {
     window.location.href = '/students';
 }
 
-if(registerForm){
-    registerForm.addEventListener('submit', async (e) => {
+if(userRegisterForm){
+    userRegisterForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = document.querySelector('#username').value;
         const email = document.querySelector('#email').value;
