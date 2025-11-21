@@ -11,9 +11,7 @@ const auth = async (req, res, next) => {
         }
 
         const token = bearerheader.split(" ")[1];
-        const user = jwt.verify(token, process.env.JWT_TOKEN);
-
-        req.token = user;
+        req.token = jwt.verify(token, process.env.JWT_TOKEN);
         next();
     } catch (e) {
         return res.status(403).json({ message: "Invalid or Expired Token" });

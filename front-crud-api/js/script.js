@@ -59,5 +59,35 @@ if (userForm) {
         }
     });
 
-
 }
+$(document).ready(function () {
+
+    $('#userTable').DataTable({
+        ajax: {
+            url: 'http://localhost:3000/api/students',
+            type: 'GET',
+            dataSrc: function (json) {
+                console.log(json);
+                return json.students; // IMPORTANT FIX
+            }
+        },
+
+        columns: [
+            { data: 'first_name' },
+            { data: 'email' },
+            { data: 'gender' },
+
+            {
+                data: '_id',
+                render: function (id, type, row) {
+                    return `
+                        <button onclick="viewUser('${id}')" class="btn btn-sm btn-primary">View</button>
+                        <button onclick="updateUser('${id}')" class="btn btn-sm btn-warning">Update</button>
+                        <button onclick="deleteUser('${id}')" class="btn btn-sm btn-danger">Delete</button>
+                    `;
+                }
+            }
+        ]
+    });
+
+});
