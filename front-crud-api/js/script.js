@@ -61,25 +61,60 @@ if (userForm) {
 
 }
 $(document).ready(function () {
-
     $('#userTable').DataTable({
-        ajax: {
-            url: 'http://localhost:3000/api/students',
-            type: 'GET',
-            dataSrc: function (json) {
-                console.log(json);
-                return json.students; // IMPORTANT FIX
-            }
+        processing: true,
+        serverSide: true,
+
+        // 👇 page size settings
+        pageLength: 5,                 // default page size
+        lengthMenu: [ [5, 10, 15],     // page size values
+            [5, 10, 15] ],   // labels shown in the dropdown
+
+        ajax: function (data, callback) {
+            const page  = Math.floor(data.start / data.length) + 1;
+            const limit = data.length;
+            const search = data.search.value || '';
+
+            const url = new URL('http://localhost:3000/api/students');
+            url.searchParams.set('page', page);
+            url.searchParams.set('limit', limit);
+            if (search) url.searchParams.set('search', search);
+
+            fetch(url)
+                .then(res => res.json())
+                .then(json => {
+                    callback({
+                        draw: data.draw,
+                        recordsTotal: json.total,
+                        recordsFiltered: json.total,
+                        data: json.students
+                    });
+                })
+                .catch(err => {
+                    console.error(err);
+                    callback({
+                        draw: data.draw,
+                        recordsTotal: 0,
+                        recordsFiltered: 0,
+                        data: []
+                    });
+                });
         },
 
         columns: [
+            {
+              data: null,
+              title: 'S.No',
+                render: function (data,type,row,meta) {
+                    return meta.row + meta.settings._iDisplayStart + 1;
+                }
+            },
             { data: 'first_name' },
             { data: 'email' },
             { data: 'gender' },
-
             {
                 data: '_id',
-                render: function (id, type, row) {
+                render: function (id) {
                     return `
                         <button onclick="viewUser('${id}')" class="btn btn-sm btn-primary">View</button>
                         <button onclick="updateUser('${id}')" class="btn btn-sm btn-warning">Update</button>
@@ -87,7 +122,11 @@ $(document).ready(function () {
                     `;
                 }
             }
-        ]
+        ],
+        layout: {
+            topStart: {
+                buttons: ['copyHtml5', 'excelHtml5', 'csvHtml5', 'pdfHtml5']
+            }
+        }
     });
-
 });
