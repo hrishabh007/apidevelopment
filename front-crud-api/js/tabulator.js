@@ -2,7 +2,6 @@ const dataUrl = 'http://localhost:3000/api/students';
 
 var table = new Tabulator("#userTable", {
     ajaxURL: dataUrl,
-
     pagination: true,
     paginationMode: "remote",
     paginationSize: 5,
@@ -14,14 +13,16 @@ var table = new Tabulator("#userTable", {
         size: "limit"   // 👈 this is the important one
     },
 
-    ajaxResponse: function(url, params, response){
+    ajaxResponse: function (url, params, response) {
         return {
             last_page: response.totalPages,
             data: response.students
         };
     },
-
     layout: "fitColumns",
+    printAsHtml: true,
+    printHeader: "<h1>Example Table Header<h1>",
+    printFooter: "<h2>Example Table Footer<h2>",
     columns: [
         {
             title: "S.No",
@@ -34,12 +35,12 @@ var table = new Tabulator("#userTable", {
                 return ((page - 1) * size) + pos;
             }
         },
-        {title: "First Name", field: "first_name"},
+        {title: "First Name", field: "first_name",headerFilter:true},
         {title: "Email", field: "email"},
         {title: "Gender", field: "gender"},
         {
             title: "Action",
-            formatter: function(cell){
+            formatter: function (cell) {
                 var rowData = cell.getData();
                 var id = rowData._id || rowData.id;
 
@@ -51,4 +52,36 @@ var table = new Tabulator("#userTable", {
             }
         }
     ]
+
+});
+//Print button
+document.querySelector("#print-table").addEventListener("click", function () {
+    table.print(false, true)
+})
+//trigger download of data.csv file
+document.getElementById("download-csv").addEventListener("click", function(){
+    table.download("csv", "data.csv");
+});
+
+//trigger download of data.json file
+document.getElementById("download-json").addEventListener("click", function(){
+    table.download("json", "data.json");
+});
+
+//trigger download of data.xlsx file
+document.getElementById("download-xlsx").addEventListener("click", function(){
+    table.download("xlsx", "data.xlsx", {sheetName:"My Data"});
+});
+
+//trigger download of data.pdf file
+document.getElementById("download-pdf").addEventListener("click", function(){
+    table.download("pdf", "data.pdf", {
+        orientation:"portrait", //set page orientation to portrait
+        title:"Example Report", //add title to report
+    });
+});
+
+//trigger download of data.html file
+document.getElementById("download-html").addEventListener("click", function(){
+    table.download("html", "data.html", {style:true});
 });
